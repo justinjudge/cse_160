@@ -9,6 +9,42 @@
     <canvas id="example" width="400" height="400">
       Please use a browser that supports "canvas"
     </canvas>
-    <script src="DrawRectangle.js"></script>
+    <!-- 3.a -->
+    <br>
+    <label >v1: x</label>
+    <input id="v1xCord" type="number">
+    <label >y</label>
+    <input id="v1yCord" type="number">
+    <br>
+    <!-- 4.a -->
+    <label >v2: x</label>
+    <input id="v2xCord" type="number">
+    <label >y</label>
+    <input id="v2yCord" type="number">
+    <br>
+    <input type="button" value="Draw" onclick="handleDrawEvent()">
+    <br>
+    <!-- 5.b -->
+    <br>
+    <label>Operation:</label>
+    <select name="operation" id="operation">
+      <option value="add">Add</option>
+      <option value="sub">Subtract</option>
+      <option value="multiply">Multiply</option>
+      <option value="divide">Divide</option>
+      <option value="angle-between">Angle Between</option>
+      <option value="area">Area</option>
+      <option value="magnitude">Magnitude</option>
+      <option value="normalize">Normalize</option>
+    </select>
+    <label>Scalar:</label>
+    <input id="scalar" type="number">
+    <br>
+    <input type="button" value="Draw" onclick="handleDrawOperationEvent()">
+
+
+    <script src="asg0.js"></script>
+    <!-- Added matrix library below as per 1. from canvas -->
+    <script src="lib/cuon-matrix-cse160.js"></script>
   </body>
 </html>
