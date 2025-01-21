@@ -35,6 +35,10 @@ function setupWebGL() {
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
+
+  // to get alpha transparency to work
+  gl.enable(gl.BLEND); 
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); 
 }
 
 function connectVariablesToGLSL() {
