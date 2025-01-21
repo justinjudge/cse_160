@@ -151,7 +151,9 @@ function beyondTheBasics() {
 
   // Arms
   drawTriangle( [0.5, 0.1,    1.0, 0.1,   0.5, -0.1] );
+  drawTriangle( [0.5, -0.1,    1.0, 0.1,   1.0, -0.1] );
   drawTriangle( [-0.5, 0.1,    -1.0, 0.1,   -0.5, -0.1] );
+  drawTriangle( [-0.5, -0.1,    -1.0, 0.1,   -1.0, -0.1] );
 
   // Head
   gl.uniform4f(u_FragColor, 1.0, 0.0, 0.0, 1.0);
