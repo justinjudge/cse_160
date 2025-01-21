@@ -79,6 +79,9 @@ let g_selectedSegments = 10;
 
 // Set up actions for the HTML UI elements
 function addActionsForHtmlUI() {
+  // Button Events for Picture
+  document.getElementById('pictureButton').onclick = function() {beyondTheBasics();};
+
   // Button Events (Shapy Type)
   document.getElementById('green').onclick = function() {g_selectedColor = [0.0, 1.0, 0.0, 1.0]; };
   document.getElementById('red').onclick = function() {g_selectedColor = [1.0, 0.0, 0.0, 1.0]; };
@@ -125,6 +128,44 @@ var g_points = [];  // The array for the position of a mouse press
 var g_colors = [];  // The array to store the color of a point
 var g_sizes = []; // The array to store the size of a point
 */
+
+// This is my Beyond The Basics attempt. I made a new Humanoid Robot.
+function beyondTheBasics() {
+  // Specify the color for clearing <canvas>
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Torso
+  gl.uniform4f(u_FragColor, 1.0, 0.8, 0.7, 1.0);
+  drawTriangle( [-0.5, -1,    0.5, 0.1,   0.5, -1] );
+  drawTriangle( [-0.5, -1,    0.5, 0.1,   -0.5, 0.1] );
+
+  // Arms
+  drawTriangle( [0.5, 0.1,    1.0, 0.1,   0.5, -0.1] );
+  drawTriangle( [-0.5, 0.1,    -1.0, 0.1,   -0.5, -0.1] );
+
+  // Head
+  gl.uniform4f(u_FragColor, 1.0, 0.0, 0.0, 1.0);
+  drawTriangle( [-0.3, 0.1,    -0.3, 0.7,   0.3, 0.7] );
+  drawTriangle( [-0.3, 0.1,    0.3, 0.7,   0.3, 0.1] );
+
+  // Eyes
+  gl.uniform4f(u_FragColor, 0.0, 0.0, 1.0, 1.0);
+  drawTriangle( [-0.1, 0.6,    -0.1, 0.5,   -0.2, 0.55] );
+  drawTriangle( [0.1, 0.6,    0.1, 0.5,   0.2, 0.55] );
+
+  // Mouth
+  gl.uniform4f(u_FragColor, 0.0, 0.0, 1.0, 1.0);
+  drawTriangle( [-0.2, 0.2,    -0.2, 0.3,   0.2, 0.3] );
+  drawTriangle( [-0.2, 0.2,    0.2, 0.3,   0.2, 0.2] );
+
+  // Hat
+  gl.uniform4f(u_FragColor, 1.0, 1.0, 0.0, 1.0);
+  drawTriangle( [0.0, 0.9,    -0.15, 0.7,   0.15, 0.7] );
+
+}
 
 function click(ev) {
   // Extract the event click and return it in WebGL coordinates
