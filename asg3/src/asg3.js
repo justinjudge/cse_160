@@ -11,17 +11,17 @@ var VSHADER_SOURCE = `
   uniform mat4 u_ProjectionMatrix; // new
   void main() {
     gl_Position = u_GloablRotateMatrix * u_ModelMatrix * a_Position;
-    // v_UV = a_UV; // new
+    v_UV = a_UV; // new
   }`
 
 // Fragment shader program
 var FSHADER_SOURCE = `
   precision mediump float; // new
-  // varying vec2 v_UV; // new 
+  varying vec2 v_UV; // new 
   uniform vec4 u_FragColor;
   void main() {
     gl_FragColor = u_FragColor;
-    // gl_FragColor = vec4(v_UV, 1.0, 1.0); // new
+    gl_FragColor = vec4(v_UV, 1.0, 1.0); // new
   }`
 
 // Gloabl Variables
@@ -72,11 +72,11 @@ function connectVariablesToGLSL() {
   }
 
   // Get the storage location of a_UV
-  /*a_UV = gl.getAttribLocation(gl.program, 'a_UV');
+  a_UV = gl.getAttribLocation(gl.program, 'a_UV');
   if (a_UV < 0) {
     console.log('Failed to get the storage location of a_UV');
     return;
-  }*/
+  }
 
   // Get the storage location of u_FragColor
   u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
@@ -100,11 +100,11 @@ function connectVariablesToGLSL() {
   }
 
   // Get the storage location of u_ViewMatrix
-  /*u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
+  u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
   if (!u_ViewMatrix) {
     console.log('Failed to get the storage location of u_ViewMatrix');
     return;
-  }*/
+  }
 
   // set an initial value for this matrix to identity
   var identityM = new Matrix4();
@@ -449,6 +449,14 @@ function updateAnimationAngles() {
 function renderAllShapes() {
   var startTime = performance.now();
 
+  // Pass the projection matrix
+  var projMat = new Matrix4();
+  gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+
+  // Pass the view matrix
+  var viewMat = new Matrix4();
+  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
   // Pass the matrix to u_ModelMatrix attribute
   var gloablRotMat = new Matrix4().rotate(g_globalAngleX, 0, 1, 0);
   gloablRotMat.rotate(g_globalAngleY, 1, 0, 0);
@@ -473,7 +481,7 @@ function renderAllShapes() {
   // drawTriangle3D( [-1.0, 0.0, 0.0,    -0.5, -1.0, 0.0,   0.0, 0.0, 0.0] );
 
   // Draw the body cube
-  /*
+  
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
   body.matrix.setTranslate(-0.25, -0.75, 0.0);
@@ -516,7 +524,10 @@ function renderAllShapes() {
   tube.matrix.rotate(90, 1, 0, 0);
   tube.matrix.translate(-0.5, 0.0, -2.0);
   tube.render();
-  */
+  
+  // #######################################################################
+  // BEGINNING OF BLOCKY ANIMAL
+  // #######################################################################
 
   // #######################################################################
   // FRONT BODY A
@@ -771,6 +782,10 @@ function renderAllShapes() {
   var barrFCoordinatesMatrix = new Matrix4(barrF.matrix);
   barrF.matrix.scale(0.1, 0.1, 0.5);
   barrF.render();
+
+  // #######################################################################
+  // END OF BLOCKY ANIMAL
+  // #######################################################################
 
   var duration = performance.now() - startTime;
   sendTextToHTML("ms: " + Math.floor(duration) + " fps: " + Math.floor(1000/duration)/10, "performance");

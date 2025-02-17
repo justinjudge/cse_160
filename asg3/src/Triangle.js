@@ -106,7 +106,7 @@ function drawTriangle3D(vertices) {
   //return n;
 }
 
-function drawTriangle3DUV(vertices) {
+function drawTriangle3DUV(vertices, uv) {
   /*var vertices = new Float32Array([
     0, 0.5,   -0.5, -0.5,   0.5, -0.5
   ]);*/
@@ -137,7 +137,6 @@ function drawTriangle3DUV(vertices) {
   // Enable the assignment to a_Position variable
   gl.enableVertexAttribArray(a_Position);
 
-  /*
   // Create a buffer object for UV
   var uvBuffer = gl.createBuffer();
   if (!uvBuffer) {
@@ -156,7 +155,6 @@ function drawTriangle3DUV(vertices) {
 
   // Enable the assignment to a_UV variable
   gl.enableVertexAttribArray(a_UV);
-  */
 
   gl.drawArrays(gl.TRIANGLES, 0, n);
   //return n;
