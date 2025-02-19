@@ -10,7 +10,7 @@ var VSHADER_SOURCE = `
   uniform mat4 u_ViewMatrix; // new
   uniform mat4 u_ProjectionMatrix; // new
   void main() {
-    gl_Position = u_GloablRotateMatrix * u_ModelMatrix * a_Position;
+    gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GloablRotateMatrix * u_ModelMatrix * a_Position;
     v_UV = a_UV; // new
   }`
 
@@ -19,9 +19,18 @@ var FSHADER_SOURCE = `
   precision mediump float; // new
   varying vec2 v_UV; // new 
   uniform vec4 u_FragColor;
+  uniform sampler2D u_Sampler0;
+  uniform int u_whichTexture;
   void main() {
-    gl_FragColor = u_FragColor;
-    gl_FragColor = vec4(v_UV, 1.0, 1.0); // new
+    if (u_whichTexture == -2) {
+      gl_FragColor = u_FragColor;                   // Use color
+    } else if (u_whichTexture == -1) {
+      gl_FragColor = vec4(v_UV, 1.0, 1.0);          // Use UV debug color
+    } else if (u_whichTexture == 0) {
+      gl_FragColor = texture2D(u_Sampler0, v_UV);   // use texture0
+    } else {
+      gl_FragColor = vec4(1, .2, .2, 1);            // Error put redish
+    }
   }`
 
 // Gloabl Variables
@@ -30,11 +39,13 @@ let gl;
 let a_Position;
 let a_UV; // new
 let u_FragColor;
+let u_whichTexture; // new
 let u_Size;
 let u_ModelMatrix;
 let u_ProjectionMatrix; // new
 let u_ViewMatrix; // new
 let u_GloablRotateMatrix
+let u_Sampler0;
 
 function setupWebGL() {
   // Retrieve <canvas> element
@@ -85,6 +96,13 @@ function connectVariablesToGLSL() {
     return;
   }
 
+  // Get the storage location of u_whichTexture
+  u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+  if (!u_whichTexture) {
+    console.log('Failed to get the storage location of u_whichTexture');
+    return;
+  }
+
   // Get the storage location of u_ModelMatrix
   u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
   if (!u_ModelMatrix) {
@@ -103,6 +121,20 @@ function connectVariablesToGLSL() {
   u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
   if (!u_ViewMatrix) {
     console.log('Failed to get the storage location of u_ViewMatrix');
+    return;
+  }
+
+  // Get the storage location of u_ProjectionMatrix
+  u_ProjectionMatrix = gl.getUniformLocation(gl.program, 'u_ProjectionMatrix');
+  if (!u_ProjectionMatrix) {
+    console.log('Failed to get the storage location of u_ProjectionMatrix');
+    return;
+  }
+
+  // Get the storage location of u_Sampler0
+  u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+  if (!u_Sampler0) {
+    console.log('Failed to get the storage location of u_Sampler0');
     return;
   }
 
@@ -265,6 +297,70 @@ function addActionsForHtmlUI() {
   // document.getElementById("segmentSlide").addEventListener('mouseup', function() { g_selectedSegments = this.value; });
 }
 
+function initTextures() {
+  var image = new Image(); // Create the image object
+  if (!image) {
+    console.log('Failed to create the image object');
+    return false;
+  }
+  // Register the event handler to be called on loading an image
+  image.onload = function(){ sendImageToTEXTURE0(0, u_Sampler0, image); };
+  // Tell the browser to load an image
+  image.src = '../media/sky.jpg';
+
+  // add more texture
+
+  return true;
+}
+
+function sendImageToTEXTURE0(n, u_Sampler, image) {
+  var texture = gl.createTexture(); // Create a texture object
+  if (!texture) {
+    console.log("Failed to create the texture object");
+    return false;
+  }
+
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+  // Enable textuyre unit0
+  gl.activeTexture(gl.TEXTURE0);
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Set the texture paramters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+  // Set the texture unit 0 to the sampler
+  gl.uniform1i(u_Sampler, 0);
+
+  //console.log('finished sendImageToTEXTURE0');
+}
+
+function sendImageToTEXTURE1(n, u_Sampler, image) {
+  var texture = gl.createTexture(); // Create a texture object
+  if (!texture) {
+    console.log("Failed to create the texture object");
+    return false;
+  }
+
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+  // Enable textuyre unit0
+  gl.activeTexture(gl.TEXTURE1);
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Set the texture paramters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+  // Set the texture unit 0 to the sampler
+  gl.uniform1i(u_Sampler, 0);
+
+  //console.log('finished sendImageToTEXTURE0');
+}
+
 function main() {
   // Set up canvas and gl variables
   setupWebGL();
@@ -277,6 +373,11 @@ function main() {
   // Register function (event handler) to be called on a mouse press
   canvas.onmousedown = click;
   canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) } };
+
+
+  document.onkeydown = keydown;
+
+  initTextures();
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -445,16 +546,112 @@ function updateAnimationAngles() {
   }
 }
 
+function keydown(ev) {
+  // var forwardVector = g_at.sub(g_eye);
+  // var sideVectorLeft = Vector3.cross(g_up, forwardVector); // side vector towards left
+  // var sideVectorRight = Vector3.cross(forwardVector, g_up); // side vector towards right
+  
+  if (ev.keyCode == 68) { // moveRight
+    //g_eye[0] += 0.2;
+    var forwardVector = new Vector3()
+    forwardVector.set(g_at.sub(g_eye));
+    forwardVector.normalize();
+    var sideVectorRight = Vector3.cross(forwardVector, g_up);
+    sideVectorRight.normalize();
+    sideVectorRight.mul(0.1);
+    g_eye.add(sideVectorRight);
+    g_at.add(sideVectorRight);
+  } else if (ev.keyCode == 65) { // moveLeft
+    //g_eye[0] -= 0.2;
+    var forwardVector = new Vector3()
+    forwardVector.set(g_at.sub(g_eye));
+    forwardVector.normalize();
+    var sideVectorLeft = Vector3.cross(g_up, forwardVector);
+    sideVectorLeft.normalize();
+    sideVectorLeft.mul(0.1);
+    g_eye.add(sideVectorLeft);
+    g_at.add(sideVectorLeft);
+  } else if (ev.keyCode == 87) { // moveForward
+    var forwardVector = new Vector3();
+    forwardVector.set(g_at.sub(g_eye));
+    //forwardVector.set(g_at);
+    //forwardVector.sub(g_eye);
+    forwardVector.normalize();
+    forwardVector.mul(0.1);
+    g_eye.add(forwardVector);
+    g_at.add(forwardVector);
+  } else if (ev.keyCode == 83) { // moveBackward
+    var forwardVector = new Vector3();
+    forwardVector.set(g_at.sub(g_eye));
+    //forwardVector.set(g_at);
+    //forwardVector.sub(g_eye);
+    forwardVector.normalize();
+    forwardVector.mul(0.1);
+    g_eye.sub(forwardVector);
+    g_at.sub(forwardVector);
+  } else if (ev.keyCode == 81) { // panLeft
+    // TODO: NOT WORKING
+    var forwardVector = new Vector3();
+    forwardVector.set(g_at.sub(g_eye));
+
+    var rotationMatrix = new Matrix4();
+    rotationMatrix.setRotate(5, 
+      g_up.elements[0],
+      g_up.elements[1],
+      g_up.elements[2],
+    );
+
+    var f_prime =  new Vector3([0,0,0]);
+    f_prime = rotationMatrix.multiplyVector3(forwardVector);
+
+    // idk why i was getting black screen when using gloabl g_eye
+    var new_eye = new Vector3();
+    new_eye.set(g_eye);
+    g_at.set(new_eye.add(f_prime));
+  } else if (ev.keyCode == 69) { // panRight
+    var forwardVector = new Vector3();
+    forwardVector.set(g_at.sub(g_eye));
+
+    var rotationMatrix = new Matrix4();
+    rotationMatrix.setRotate(-5, 
+      g_up.elements[0],
+      g_up.elements[1],
+      g_up.elements[2],
+    );
+
+    var f_prime =  new Vector3([0,0,0]);
+    f_prime = rotationMatrix.multiplyVector3(forwardVector);
+
+    // idk why i was getting black screen when using gloabl g_eye
+    var new_eye = new Vector3();
+    new_eye.set(g_eye);
+    g_at.set(new_eye.add(f_prime));
+  }
+
+  renderAllShapes();
+  console.log(ev.keyCode);
+}
+
+var g_eye = new Vector3([0, 0, 3]);
+var g_at = new Vector3([0,0,-100]);
+var g_up = new Vector3([0,1,0]);
+
 // Draw every shape that is supposed to be in the canvas
 function renderAllShapes() {
   var startTime = performance.now();
 
   // Pass the projection matrix
   var projMat = new Matrix4();
+  projMat.setPerspective(50, canvas.width/canvas.height, 0.1, 100);
   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
   // Pass the view matrix
   var viewMat = new Matrix4();
+  //viewMat.setLookAt(g_eye[0], g_eye[1], g_eye[2], g_at[0], g_at[1], g_at[2], g_up[0], g_up[1], g_up[0]); // (eye, at, up)
+  viewMat.setLookAt(
+    g_eye.elements[0], g_eye.elements[1], g_eye.elements[2], 
+    g_at.elements[0], g_at.elements[1], g_at.elements[2], 
+    g_up.elements[0], g_up.elements[1], g_up.elements[0]); // (eye, at, up)
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
 
   // Pass the matrix to u_ModelMatrix attribute
@@ -481,9 +678,26 @@ function renderAllShapes() {
   // drawTriangle3D( [-1.0, 0.0, 0.0,    -0.5, -1.0, 0.0,   0.0, 0.0, 0.0] );
 
   // Draw the body cube
+
+  var floor = new Cube();
+  floor.color = [1.0, 0.0, 0.0, 1.0];
+  floor.textureNum = 0;
+  floor.matrix.translate(0, -.75, 0.0);
+  floor.matrix.scale(10, 0, 10);
+  floor.matrix.translate(-.5, 0, -.5);
+  floor.render();
+
+  var sky = new Cube();
+  sky.color = [0.5, 0.9, 1, 1.0];
+  sky.textureNum = -1;
+  sky.matrix.translate(0, -.751, 0.0);
+  sky.matrix.scale(100, 100, 100);
+  sky.matrix.translate(-.5, 0, -.5);
+  sky.render();
   
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
+  body.textureNum = 0;
   body.matrix.setTranslate(-0.25, -0.75, 0.0);
   body.matrix.rotate(-5, 1, 0, 0);
   body.matrix.scale(0.5, 0.3, 0.5);
@@ -492,6 +706,7 @@ function renderAllShapes() {
   // Draw a left arm
   var leftArm = new Cube();
   leftArm.color = [1, 1, 0, 1];
+  leftArm.textureNum = -1;
   leftArm.matrix.setTranslate(0, -0.5, 0.0);
   leftArm.matrix.rotate(-5, 1, 0, 0);
   leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
@@ -508,6 +723,7 @@ function renderAllShapes() {
   // Test box
   var box = new Cube();
   box.color = [1, 0, 1, 1];
+  box.textureNum = 0;
   box.matrix = yellowCoordinatesMatrix;
   box.matrix.translate(0, 0.65, 0);
   box.matrix.rotate(g_magentaAngle, 0, 0, 1);
@@ -517,271 +733,17 @@ function renderAllShapes() {
   box.render();
 
   // Draw the tube
-  var tube = new Cylinder();
+  /*var tube = new Cylinder();
   tube.color = [0.0, 1.0, 0.0, 1.0];
   tube.matrix = purpleCoordinatesMatrix;
   tube.matrix.scale(0.3, 0.3, 0.3);
   tube.matrix.rotate(90, 1, 0, 0);
   tube.matrix.translate(-0.5, 0.0, -2.0);
-  tube.render();
+  tube.render();*/
   
   // #######################################################################
   // BEGINNING OF BLOCKY ANIMAL
   // #######################################################################
-
-  // #######################################################################
-  // FRONT BODY A
-  // #######################################################################
-
-  /**
-   *  Draw Front Body
-   */
-  var bodyA = new Cube();
-  bodyA.color = [1, 0.733, 0, 1];
-  bodyA.matrix.setTranslate(-0.6, 0, 0);
-  var bodyACoordinatesMatrix = new Matrix4(bodyA.matrix);
-  var bodyA2CoordinatesMatrix = new Matrix4(bodyA.matrix);
-  var bodyA3CoordinatesMatrix = new Matrix4(bodyA.matrix);
-  bodyA.matrix.scale(0.3, 0.3, 0.3);
-  bodyA.render();
-
-  /**
-   *  Draw Upper Leg BodyA
-   */
-  var upLegA = new Cube();
-  upLegA.color = [0.443, 0.459, 0, 1];
-  upLegA.matrix = bodyACoordinatesMatrix;
-  upLegA.matrix.translate(0.1, 0.15, -0.1);
-  upLegA.matrix.rotate(g_upLegAAngle, 0, 0, 1);
-  var upLegACoordinatesMatrix = new Matrix4(upLegA.matrix);
-  upLegA.matrix.scale(0.1, -0.3, 0.1);
-  upLegA.render();
-
-  /**
-   *  Draw Lower Leg BodyA
-   */
-  var loLegA = new Cube();
-  loLegA.color = [0.443, 0.459, 0, 1];
-  loLegA.matrix = upLegACoordinatesMatrix;
-  loLegA.matrix.translate(0.0, -0.3, 0.0);
-  loLegA.matrix.rotate(g_loLegAAngle, 0, 0, 1);
-  var loLegACoordinatesMatrix = new Matrix4(loLegA.matrix);
-  loLegA.matrix.scale(0.1, -0.3, 0.1);
-  loLegA.render();
-
-  /**
-   *  Draw Foot BodyA
-   */
-  var footA = new Cube();
-  footA.color = [0.443, 0.459, 0, 1];
-  footA.matrix = loLegACoordinatesMatrix;
-  footA.matrix.translate(0.1, -0.4, 0.0);
-  footA.matrix.rotate(g_footAAngle, 0, 0, 1);
-  footA.matrix.scale(-0.3, 0.1, 0.1);
-  footA.render();
-
-  /**
-   *  Draw Upper RIGHT Leg BodyA
-   */
-  var upLegA2 = new Cube();
-  upLegA2.color = [0.443, 0.459, 0, 1];
-  upLegA2.matrix = bodyA2CoordinatesMatrix;
-  upLegA2.matrix.translate(0.1, 0.15, 0.3);
-  upLegA2.matrix.rotate(g_upLegA2Angle, 0, 0, 1);
-  var upLegA2CoordinatesMatrix = new Matrix4(upLegA2.matrix);
-  upLegA2.matrix.scale(0.1, -0.3, 0.1);
-  upLegA2.render();
-
-  
-  /**
-   *  Draw Lower RIGHT Leg BodyA
-   */
-  var loLegA2 = new Cube();
-  loLegA2.color = [0.443, 0.459, 0, 1];
-  loLegA2.matrix = upLegA2CoordinatesMatrix;
-  loLegA2.matrix.translate(0.0, -0.3, 0.0);
-  loLegA2.matrix.rotate(g_loLegA2Angle, 0, 0, 1);
-  var loLegA2CoordinatesMatrix = new Matrix4(loLegA2.matrix);
-  loLegA2.matrix.scale(0.1, -0.3, 0.1);
-  loLegA2.render();
-  
-  /**
-   *  Draw Foot RIGHT BodyA
-   */
-  var footA2 = new Cube();
-  footA2.color = [0.443, 0.459, 0, 1];
-  footA2.matrix = loLegA2CoordinatesMatrix;
-  footA2.matrix.translate(0.1, -0.4, 0.0);
-  footA2.matrix.rotate(g_footA2Angle, 0, 0, 1);
-  footA2.matrix.scale(-0.3, 0.1, 0.1);
-  footA2.render();
-
-  // #######################################################################
-  // MIDDLE BODY B
-  // #######################################################################
-
-  /**
-   *  Draw Front Cylinder Body B
-   */
-  var bodyB = new Cylinder();
-  bodyB.color = [0.443, 0.459, 0, 1];
-  bodyB.matrix = bodyA3CoordinatesMatrix;
-  bodyB.matrix.translate(0.25, 0.05, 0.25);
-  bodyB.matrix.rotate(90, 0, 1, 0);
-  bodyB.matrix.rotate(g_bodyBAngle, 0, 1, 0);
-  var bodyBCoordinatesMatrix = new Matrix4(bodyB.matrix);
-  var bodyB2CoordinatesMatrix = new Matrix4(bodyB.matrix);
-  bodyB.matrix.scale(0.2, 0.2, 0.2);
-  bodyB.render();
-
-  /**
-   *  Draw Middle Body C
-   */
-  var bodyC = new Cube();
-  bodyC.color = [1, 0.733, 0, 1];
-  bodyC.matrix = bodyBCoordinatesMatrix;
-  bodyC.matrix.translate(-0.05, -0.05, 0.2);
-  var bodyCCoordinatesMatrix = new Matrix4(bodyC.matrix);
-  var bodyC2CoordinatesMatrix = new Matrix4(bodyC.matrix);
-  //bodyC.matrix.rotate(90, 0, 1, 0);
-  //bodyC.matrix.rotate(g_magentaAngle, 0, 1, 0);
-  bodyC.matrix.scale(0.3, 0.3, 0.3);
-  bodyC.render();
-
-  /**
-   *  Draw Back Cylinder Body D
-   */
-  var bodyD = new Cylinder();
-  bodyD.color = [0.443, 0.459, 0, 1];
-  bodyD.matrix = bodyCCoordinatesMatrix;
-  bodyD.matrix.translate(0.05, 0.05, 0.25);
-  //bodyD.matrix.rotate(90, 0, 1, 0);
-  bodyD.matrix.rotate(g_bodyDAngle, 0, 1, 0);
-  var bodyDCoordinatesMatrix = new Matrix4(bodyD.matrix);
-  var bodyD2CoordinatesMatrix = new Matrix4(bodyD.matrix);
-  bodyD.matrix.scale(0.2, 0.2, 0.2);
-  bodyD.render();
-
-  // #######################################################################
-  // Back BODY E
-  // #######################################################################
-
-  /**
-   *  Draw Back Body E
-   */
-  var bodyE = new Cube();
-  bodyE.color = [1, 0.733, 0, 1];
-  bodyE.matrix = bodyDCoordinatesMatrix;
-  bodyE.matrix.translate(-0.05, -0.05, 0.2);
-  //bodyE.matrix.rotate(90, 0, 1, 0);
-  bodyE.matrix.rotate(g_bodyEAngle, 0, 1, 0);
-  var bodyECoordinatesMatrix = new Matrix4(bodyE.matrix);
-  var bodyE2CoordinatesMatrix = new Matrix4(bodyE.matrix);
-  var bodyE3CoordinatesMatrix = new Matrix4(bodyE.matrix);
-  bodyE.matrix.scale(0.3, 0.3, 0.3);
-  bodyE.render();
-
-  /**
-   *  Draw Upper Leg BodyE
-   */
-  var upLegE = new Cube();
-  upLegE.color = [0.443, 0.459, 0, 1];
-  upLegE.matrix = bodyECoordinatesMatrix;
-  upLegE.matrix.translate(0.0, 0.15, 0.1);
-  upLegE.matrix.rotate(-90, 0, 1, 0);
-  upLegE.matrix.rotate(g_upLegEAngle, 0, 0, 1);
-  var upLegECoordinatesMatrix = new Matrix4(upLegE.matrix);
-  upLegE.matrix.scale(0.1, -0.3, 0.1);
-  upLegE.render();
-
-  /**
-   *  Draw Lower Leg BodyE
-   */
-  var loLegE = new Cube();
-  loLegE.color = [0.443, 0.459, 0, 1];
-  loLegE.matrix = upLegECoordinatesMatrix;
-  loLegE.matrix.translate(0.0, -0.3, 0.0);
-  loLegE.matrix.rotate(g_loLegEAngle, 0, 0, 1);
-  var loLegECoordinatesMatrix = new Matrix4(loLegE.matrix);
-  loLegE.matrix.scale(0.1, -0.3, 0.1);
-  loLegE.render();
-
-  /**
-   *  Draw Foot BodyA
-   */
-  var footE = new Cube();
-  footE.color = [0.443, 0.459, 0, 1];
-  footE.matrix = loLegECoordinatesMatrix;
-  footE.matrix.translate(0.1, -0.4, 0.0);
-  footE.matrix.rotate(g_footEAngle, 0, 0, 1);
-  footE.matrix.scale(-0.3, 0.1, 0.1);
-  footE.render();
-
-  /**
-   *  Draw Upper RIGHT Leg BodyA
-   */
-  var upLegE2 = new Cube();
-  upLegE2.color = [0.443, 0.459, 0, 1];
-  upLegE2.matrix = bodyE2CoordinatesMatrix;
-  upLegE2.matrix.translate(0.4, 0.15, 0.1);
-  upLegE2.matrix.rotate(-90, 0, 1, 0);
-  upLegE2.matrix.rotate(g_upLegE2Angle, 0, 0, 1);
-  var upLegE2CoordinatesMatrix = new Matrix4(upLegE2.matrix);
-  upLegE2.matrix.scale(0.1, -0.3, 0.1);
-  upLegE2.render();
-
-  /**
-   *  Draw Lower RIGHT Leg BodyE
-   */
-  var loLegE2 = new Cube();
-  loLegE2.color = [0.443, 0.459, 0, 1];
-  loLegE2.matrix = upLegE2CoordinatesMatrix;
-  loLegE2.matrix.translate(0.0, -0.3, 0.0);
-  loLegE2.matrix.rotate(g_loLegE2Angle, 0, 0, 1);
-  var loLegE2CoordinatesMatrix = new Matrix4(loLegE2.matrix);
-  loLegE2.matrix.scale(0.1, -0.3, 0.1);
-  loLegE2.render();
-
-  /**
-   *  Draw Foot RIGHT BodyE
-   */
-  var footE2 = new Cube();
-  footE2.color = [0.443, 0.459, 0, 1];
-  footE2.matrix = loLegE2CoordinatesMatrix;
-  footE2.matrix.translate(0.1, -0.4, 0.0);
-  footE2.matrix.rotate(g_footE2Angle, 0, 0, 1);
-  footE2.matrix.scale(-0.3, 0.1, 0.1);
-  footE2.render();
-
-  // #######################################################################
-  // Back BODY E Turret
-  // #######################################################################
-
-  /**
-   *  Draw Body Turret Cylinder turrF
-   */
-  var turrF = new Cylinder();
-  turrF.color = [.729, 0, 0, 1];
-  turrF.matrix = bodyE3CoordinatesMatrix;
-  turrF.matrix.translate(0.05, 0.3, 0.25);
-  turrF.matrix.rotate(-90, 1, 0, 0);
-  // turrF.matrix.rotate(g_magentaAngle, 0, 0, 1);
-  var turrFCoordinatesMatrix = new Matrix4(turrF.matrix);
-  turrF.matrix.scale(0.2, 0.2, 0.2);
-  turrF.render();
-
-  /**
-   *  Draw Body Barrel Cylinder barrF
-   */
-  var barrF = new Cylinder();
-  barrF.color = [0.82, .294, 0.349, 1];
-  barrF.matrix = turrFCoordinatesMatrix;
-  barrF.matrix.translate(0.05, 0.15, 0.15);
-  barrF.matrix.rotate(-90, 1, 0, 0);
-  barrF.matrix.rotate(g_turrAngle, 0, 1, 0);
-  var barrFCoordinatesMatrix = new Matrix4(barrF.matrix);
-  barrF.matrix.scale(0.1, 0.1, 0.5);
-  barrF.render();
 
   // #######################################################################
   // END OF BLOCKY ANIMAL
