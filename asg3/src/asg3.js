@@ -507,6 +507,7 @@ function click(ev) {
 
   // Draw every shape that is supposed to be in the canvas
   renderAllShapes();
+  drawMap();
 }
 
 // Extract the event click and return it in WebGL coordinates
@@ -697,12 +698,67 @@ function drawMap() {
     if (ev.button === 0) { // 0 indicates the left mouse button
       console.log("Left mouse button is down");
       g_map[Math.round(g_eye.elements[0]) + 8][Math.round(g_eye.elements[2]) + 8] = 1;
+
+      let x = Math.round(g_eye.elements[0]);
+      let y = Math.round(g_eye.elements[2]) + 8;
+
+      if (g_map[x][y] >= 1) {
+        var body = new Cube();
+        body.color = [1.0, 1.0, 1.0, 1.0];
+        body.textureNum = 1;
+        body.matrix.translate(x-8, -.75, y-8);
+        body.render();
+      }
+      if (g_map[x][y] >= 2) {
+        var body = new Cube();
+        body.color = [1.0, 1.0, 1.0, 1.0];
+        body.textureNum = 1;
+        body.matrix.translate(x-8, 0.25, y-8);
+        body.render();
+      }
+      if (g_map[x][y] >= 3) {
+        var body = new Cube();
+        body.color = [1.0, 1.0, 1.0, 1.0];
+        body.textureNum = 1;
+        body.matrix.translate(x-8, 1.25, y-8);
+        body.render();
+      }
     } else if (ev.button === 2) {
       console.log("Right mouse button is down");
       g_map[Math.round(g_eye.elements[0]) + 8][Math.round(g_eye.elements[2]) + 8] = 0;
     }
   });
+/*
+  for (x = 0; x < g_map.length; x++) {
+    for (y = 0; y < g_map[0].length; y++) {
+      //console.log(x, y);
+      if (g_map[x][y] >= 1) {
+        var body = new Cube();
+        body.color = [1.0, 1.0, 1.0, 1.0];
+        body.textureNum = 1;
+        body.matrix.translate(x-8, -.75, y-8);
+        body.render();
+      }
+      if (g_map[x][y] >= 2) {
+        var body = new Cube();
+        body.color = [1.0, 1.0, 1.0, 1.0];
+        body.textureNum = 1;
+        body.matrix.translate(x-8, 0.25, y-8);
+        body.render();
+      }
+      if (g_map[x][y] >= 3) {
+        var body = new Cube();
+        body.color = [1.0, 1.0, 1.0, 1.0];
+        body.textureNum = 1;
+        body.matrix.translate(x-8, 1.25, y-8);
+        body.render();
+      }
+    }
+  }
+    */
+}
 
+function drawWholeMap() {
   for (x = 0; x < g_map.length; x++) {
     for (y = 0; y < g_map[0].length; y++) {
       //console.log(x, y);
@@ -785,12 +841,12 @@ function renderAllShapes() {
   var sky = new Cube();
   sky.color = [0.5, 0.9, 1, 1.0];
   sky.textureNum = 0;
-  sky.matrix.translate(0, -.76, 0.0);
+  sky.matrix.translate(0, -1, 0.0);
   sky.matrix.scale(1000, 1000, 1000);
   sky.matrix.translate(-.5, 0, -.5);
   sky.render();
 
-  drawMap();
+  drawWholeMap();
   
   /*var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
