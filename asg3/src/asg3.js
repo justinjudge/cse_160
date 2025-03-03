@@ -384,7 +384,8 @@ function main() {
   canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) } };
 
 
-  document.onkeydown = keydown;
+  // document.onkeydown = keydown;
+  document.addEventListener("keydown", keydown);
 
   initTextures();
 
@@ -557,51 +558,81 @@ function updateAnimationAngles() {
 }
 
 function keydown(ev) {
+  debugger;
   // var forwardVector = g_at.sub(g_eye);
   // var sideVectorLeft = Vector3.cross(g_up, forwardVector); // side vector towards left
   // var sideVectorRight = Vector3.cross(forwardVector, g_up); // side vector towards right
+
+  /*
+  0 velocity vector outside
+  modify velocitiy in conditionals
+  add eye and after conditionals
+  */
+  // forwardvector
+  var forwardVector = new Vector3()
+  forwardVector.set(g_at);
+  forwardVector.sub(g_eye);
+  forwardVector.normalize();
+  forwardVector.mul(0.1);
+  var sideVectorRight = Vector3.cross(forwardVector, g_up);
+  sideVectorRight.normalize();
+  sideVectorRight.mul(0.1);
+
+  var velocityVector = new Vector3((0, 0, 0))
   
   if (ev.keyCode == 68) { // moveRight
     //g_eye[0] += 0.2;
-    var forwardVector = new Vector3()
+    /*var forwardVector = new Vector3()
     forwardVector.set(g_at.sub(g_eye));
-    forwardVector.normalize();
-    var sideVectorRight = Vector3.cross(forwardVector, g_up);
+    forwardVector.normalize();*/
+    /*var sideVectorRight = Vector3.cross(forwardVector, g_up);
     sideVectorRight.normalize();
-    sideVectorRight.mul(0.1);
+    sideVectorRight.mul(0.1);*/
     g_eye.add(sideVectorRight);
     g_at.add(sideVectorRight);
-  } else if (ev.keyCode == 65) { // moveLeft
+    //velocityVector.elements[0] = .1
+  }
+  if (ev.keyCode == 65) { // moveLeft
     //g_eye[0] -= 0.2;
-    var forwardVector = new Vector3()
+    /*var forwardVector = new Vector3()
     forwardVector.set(g_at.sub(g_eye));
-    forwardVector.normalize();
-    var sideVectorLeft = Vector3.cross(g_up, forwardVector);
+    forwardVector.normalize();*/
+    /*var sideVectorLeft = Vector3.cross(g_up, forwardVector);
     sideVectorLeft.normalize();
-    sideVectorLeft.mul(0.1);
-    g_eye.add(sideVectorLeft);
-    g_at.add(sideVectorLeft);
-  } else if (ev.keyCode == 87) { // moveForward
-    var forwardVector = new Vector3();
+    sideVectorLeft.mul(0.1);*/
+    //g_eye.add(sideVectorLeft);
+    //g_at.add(sideVectorLeft);
+    g_eye.sub(sideVectorRight);
+    g_at.sub(sideVectorRight);
+    //velocityVector.elements[0] = -.1
+  }
+  if (ev.keyCode == 87) { // moveForward
+    /*var forwardVector = new Vector3();
     forwardVector.set(g_at.sub(g_eye));
     //forwardVector.set(g_at);
     //forwardVector.sub(g_eye);
-    forwardVector.normalize();
-    forwardVector.mul(0.1);
+    forwardVector.normalize();*/
+    //forwardVector.mul(0.1);
     g_eye.add(forwardVector);
     g_at.add(forwardVector);
-  } else if (ev.keyCode == 83) { // moveBackward
-    var forwardVector = new Vector3();
+    //velocityVector.elements[2] = -.1
+  }
+  if (ev.keyCode == 83) { // moveBackward
+    /*var forwardVector = new Vector3();
     forwardVector.set(g_at.sub(g_eye));
     //forwardVector.set(g_at);
     //forwardVector.sub(g_eye);
-    forwardVector.normalize();
-    forwardVector.mul(0.1);
+    forwardVector.normalize();*/
+    //forwardVector.mul(0.1);
     g_eye.sub(forwardVector);
     g_at.sub(forwardVector);
-  } else if (ev.keyCode == 81) { // panLeft
-    var forwardVector = new Vector3();
-    forwardVector.set(g_at.sub(g_eye));
+    //velocityVector.elements[2] = .1
+  }
+  //g_eye.add(velocityVector);
+  //g_at.add(velocityVector);
+  if (ev.keyCode == 81) { // panLeft
+    //var forwardVector = new Vector3();
+    //forwardVector.set(g_at.sub(g_eye));
 
     var rotationMatrix = new Matrix4();
     rotationMatrix.setRotate(5, 
@@ -609,6 +640,7 @@ function keydown(ev) {
       g_up.elements[1],
       g_up.elements[2],
     );
+    //rotationMatrix.setRotate(5, g_up);
 
     var f_prime =  new Vector3([0,0,0]);
     f_prime = rotationMatrix.multiplyVector3(forwardVector);
@@ -617,9 +649,10 @@ function keydown(ev) {
     var new_eye = new Vector3();
     new_eye.set(g_eye);
     g_at.set(new_eye.add(f_prime));
-  } else if (ev.keyCode == 69) { // panRight
-    var forwardVector = new Vector3();
-    forwardVector.set(g_at.sub(g_eye));
+  }
+  if (ev.keyCode == 69) { // panRight
+    //var forwardVector = new Vector3();
+    //forwardVector.set(g_at.sub(g_eye));
 
     var rotationMatrix = new Matrix4();
     rotationMatrix.setRotate(-5, 
@@ -627,6 +660,7 @@ function keydown(ev) {
       g_up.elements[1],
       g_up.elements[2],
     );
+    //rotationMatrix.setRotate(-5, g_up);
 
     var f_prime =  new Vector3([0,0,0]);
     f_prime = rotationMatrix.multiplyVector3(forwardVector);
@@ -637,7 +671,7 @@ function keydown(ev) {
     g_at.set(new_eye.add(f_prime));
   }
 
-  renderAllShapes();
+  //renderAllShapes();
   //console.log(ev.keyCode);
 }
 
@@ -759,9 +793,14 @@ function drawMap() {
 }
 
 function drawWholeMap() {
+  // debugger;
+  //var body = new Cube();
+  //body.color = [1.0, 1.0, 1.0, 1.0];
+  //body.textureNum = 1;
   for (x = 0; x < g_map.length; x++) {
     for (y = 0; y < g_map[0].length; y++) {
       //console.log(x, y);
+      //body.matrix.setIdentity();
       if (g_map[x][y] >= 1) {
         var body = new Cube();
         body.color = [1.0, 1.0, 1.0, 1.0];
@@ -783,6 +822,7 @@ function drawWholeMap() {
         body.matrix.translate(x-8, 1.25, y-8);
         body.render();
       }
+      //body.render();
     }
   }
 }
