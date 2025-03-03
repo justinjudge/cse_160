@@ -250,7 +250,9 @@ function addActionsForHtmlUI() {
     //g_globalAngleY -= dy * 0.5;
 
     var forwardVector = new Vector3();
-    forwardVector.set(g_at.sub(g_eye));
+    forwardVector.set(g_at);
+    forwardVector.sub(g_eye);
+    //forwardVector.set(g_at.sub(g_eye));
 
     var rotationMatrix = new Matrix4();
     rotationMatrix.setRotate(-dx * 0.7, 
@@ -272,7 +274,18 @@ function addActionsForHtmlUI() {
     g_lastMouseX = ev.clientX;
     //g_lastMouseY = ev.clientY;
 
-    renderAllShapes();
+    //renderAllShapes();
+  });
+
+  // Edit g_map if user click to add block.
+  document.getElementById("webgl").addEventListener('mousedown', function(ev) {
+    if (ev.button === 0) { // 0 indicates the left mouse button
+      console.log("Left mouse button is down");
+      g_map[Math.round(g_eye.elements[0]) + 8][Math.round(g_eye.elements[2]) + 8] = 1;
+    } else if (ev.button === 2) {
+      console.log("Right mouse button is down");
+      g_map[Math.round(g_eye.elements[0]) + 8][Math.round(g_eye.elements[2]) + 8] = 0;
+    }
   });
 
   document.getElementById("webgl").addEventListener('mouseup', function(ev) {
@@ -280,12 +293,12 @@ function addActionsForHtmlUI() {
   });
 
   // Shift click control
-  document.getElementById("webgl").addEventListener('click', function(ev) {
+  /*document.getElementById("webgl").addEventListener('click', function(ev) {
     if (ev.shiftKey) {
       g_pokeAnimation = true;
     }
     renderAllShapes(); 
-  });
+  });*/
 
 
 
@@ -380,8 +393,8 @@ function main() {
   addActionsForHtmlUI();
 
   // Register function (event handler) to be called on a mouse press
-  canvas.onmousedown = click;
-  canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) } };
+  //canvas.onmousedown = click;
+  //canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) } };
 
 
   // document.onkeydown = keydown;
@@ -468,10 +481,10 @@ function beyondTheBasics() {
 
 function click(ev) {
   // Extract the event click and return it in WebGL coordinates
-  let [x, y] = convertCoordinatesEventToGL(ev);
+  // let [x, y] = convertCoordinatesEventToGL(ev);
   
   // Create and store the new point
-  let point;
+  /*let point;
   if (g_selectedType == POINT) {
     point = new Point();
   } else if (g_selectedType == TRIANGLE) {
@@ -483,7 +496,7 @@ function click(ev) {
   point.position = [x, y];
   point.color = g_selectedColor.slice();
   point.size = g_selectedSize;
-  g_shapesList.push(point);
+  g_shapesList.push(point);*/
   
   /*
   // Store the coordinates to g_points array
@@ -508,7 +521,7 @@ function click(ev) {
 
   // Draw every shape that is supposed to be in the canvas
   renderAllShapes();
-  drawMap();
+  //drawMap();
 }
 
 // Extract the event click and return it in WebGL coordinates
@@ -693,25 +706,25 @@ let g_map = [
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 1, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 1, 3, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 1, 2, 3, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -733,7 +746,7 @@ function drawMap() {
       console.log("Left mouse button is down");
       g_map[Math.round(g_eye.elements[0]) + 8][Math.round(g_eye.elements[2]) + 8] = 1;
 
-      let x = Math.round(g_eye.elements[0]);
+      /*let x = Math.round(g_eye.elements[0]);
       let y = Math.round(g_eye.elements[2]) + 8;
 
       if (g_map[x][y] >= 1) {
@@ -756,7 +769,7 @@ function drawMap() {
         body.textureNum = 1;
         body.matrix.translate(x-8, 1.25, y-8);
         body.render();
-      }
+      }*/
     } else if (ev.button === 2) {
       console.log("Right mouse button is down");
       g_map[Math.round(g_eye.elements[0]) + 8][Math.round(g_eye.elements[2]) + 8] = 0;
@@ -799,141 +812,40 @@ function drawWholeMap() {
   //body.textureNum = 1;
   for (x = 0; x < g_map.length; x++) {
     for (y = 0; y < g_map[0].length; y++) {
-      //console.log(x, y);
-      //body.matrix.setIdentity();
-      if (g_map[x][y] >= 1) {
+      if (g_map[x][y] > 0) {
         var body = new Cube();
         body.color = [1.0, 1.0, 1.0, 1.0];
         body.textureNum = 1;
-        body.matrix.translate(x-8, -.75, y-8);
+
+        //console.log(x, y);
+        //body.matrix.setIdentity();
+        if (g_map[x][y] >= 3) {
+          /*var body = new Cube();
+          body.color = [1.0, 1.0, 1.0, 1.0];
+          body.textureNum = 1;*/
+          body.matrix.setTranslate(x-8, 1.25, y-8);
+          //body.render();
+        } else if (g_map[x][y] >= 2) {
+          /*var body = new Cube();
+          body.color = [1.0, 1.0, 1.0, 1.0];
+          body.textureNum = 1;*/
+          body.matrix.setTranslate(x-8, 0.25, y-8);
+          //body.render();
+        } else if (g_map[x][y] >= 1) {
+          /*var body = new Cube();
+          body.color = [1.0, 1.0, 1.0, 1.0];
+          body.textureNum = 1;*/
+          body.matrix.setTranslate(x-8, -.75, y-8);
+          //body.render();
+        }
+
         body.render();
       }
-      if (g_map[x][y] >= 2) {
-        var body = new Cube();
-        body.color = [1.0, 1.0, 1.0, 1.0];
-        body.textureNum = 1;
-        body.matrix.translate(x-8, 0.25, y-8);
-        body.render();
-      }
-      if (g_map[x][y] >= 3) {
-        var body = new Cube();
-        body.color = [1.0, 1.0, 1.0, 1.0];
-        body.textureNum = 1;
-        body.matrix.translate(x-8, 1.25, y-8);
-        body.render();
-      }
-      //body.render();
     }
   }
 }
 
-// Draw every shape that is supposed to be in the canvas
-function renderAllShapes() {
-  var startTime = performance.now();
-
-  // Pass the projection matrix
-  var projMat = new Matrix4();
-  projMat.setPerspective(50, canvas.width/canvas.height, 0.1, 1000);
-  gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
-
-  // Pass the view matrix
-  var viewMat = new Matrix4();
-  //viewMat.setLookAt(g_eye[0], g_eye[1], g_eye[2], g_at[0], g_at[1], g_at[2], g_up[0], g_up[1], g_up[0]); // (eye, at, up)
-  viewMat.setLookAt(
-    g_eye.elements[0], g_eye.elements[1], g_eye.elements[2], 
-    g_at.elements[0], g_at.elements[1], g_at.elements[2], 
-    g_up.elements[0], g_up.elements[1], g_up.elements[0]); // (eye, at, up)
-  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
-
-  // Pass the matrix to u_ModelMatrix attribute
-  var gloablRotMat = new Matrix4().rotate(g_globalAngleX, 0, 1, 0);
-  gloablRotMat.rotate(g_globalAngleY, 1, 0, 0);
-  gloablRotMat.rotate(g_globalAngleZ, 0, 0, 1);
-
-  gl.uniformMatrix4fv(u_GloablRotateMatrix, false, gloablRotMat.elements);
-
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
-  //var len = g_points.length;
-  /*var len = g_shapesList.length;
-
-  for(var i = 0; i < len; i++) {
-
-    g_shapesList[i].render();
-  
-  }*/
-
-  // Draw a test triangle
-  // drawTriangle3D( [-1.0, 0.0, 0.0,    -0.5, -1.0, 0.0,   0.0, 0.0, 0.0] );
-
-  // Draw the body cube
-
-  var floor = new Cube();
-  floor.color = [0.3, 0.5, 0.35, 1.0];
-  floor.textureNum = -2;
-  floor.matrix.translate(0, -.75, 0.0);
-  floor.matrix.scale(100, 0, 100);
-  floor.matrix.translate(-.5, 0, -.5);
-  floor.render();
-
-  var sky = new Cube();
-  sky.color = [0.5, 0.9, 1, 1.0];
-  sky.textureNum = 0;
-  sky.matrix.translate(0, -1, 0.0);
-  sky.matrix.scale(1000, 1000, 1000);
-  sky.matrix.translate(-.5, 0, -.5);
-  sky.render();
-
-  drawWholeMap();
-  
-  /*var body = new Cube();
-  body.color = [1.0, 0.0, 0.0, 1.0];
-  body.textureNum = 1;
-  body.matrix.setTranslate(-0.25, -0.75, 0.0);
-  body.matrix.rotate(-5, 1, 0, 0);
-  body.matrix.scale(0.5, 0.3, 0.5);
-  body.render();
-
-  // Draw a left arm
-  var leftArm = new Cube();
-  leftArm.color = [1, 1, 0, 1];
-  leftArm.textureNum = -1;
-  leftArm.matrix.setTranslate(0, -0.5, 0.0);
-  leftArm.matrix.rotate(-5, 1, 0, 0);
-  leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
-  //if (g_yellowAnimation) {
-  //  leftArm.matrix.rotate(45*Math.sin(g_seconds), 0, 0, 1);
-  //} else {
-  //  leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
-  //}
-  var yellowCoordinatesMatrix = new Matrix4(leftArm.matrix);
-  leftArm.matrix.scale(0.25, 0.7, 0.5);
-  leftArm.matrix.translate(-0.5, 0, 0);
-  leftArm.render();
-
-  // Test box
-  var box = new Cube();
-  box.color = [1, 0, 1, 1];
-  box.textureNum = 0;
-  box.matrix = yellowCoordinatesMatrix;
-  box.matrix.translate(0, 0.65, 0);
-  box.matrix.rotate(g_magentaAngle, 0, 0, 1);
-  var purpleCoordinatesMatrix = new Matrix4(box.matrix);
-  box.matrix.scale(0.3, 0.3, 0.3);
-  box.matrix.translate(-0.5, 0, -0.001);
-  box.render();*/
-
-  // Draw the tube
-  /*var tube = new Cylinder();
-  tube.color = [0.0, 1.0, 0.0, 1.0];
-  tube.matrix = purpleCoordinatesMatrix;
-  tube.matrix.scale(0.3, 0.3, 0.3);
-  tube.matrix.rotate(90, 1, 0, 0);
-  tube.matrix.translate(-0.5, 0.0, -2.0);
-  tube.render();*/
-  
+function drawBlockyAnimal() {
   // #######################################################################
   // BEGINNING OF BLOCKY ANIMAL
   // #######################################################################
@@ -1214,6 +1126,117 @@ function renderAllShapes() {
   // #######################################################################
   // END OF BLOCKY ANIMAL
   // #######################################################################
+}
+
+// Draw every shape that is supposed to be in the canvas
+function renderAllShapes() {
+  var startTime = performance.now();
+
+  // Pass the projection matrix
+  var projMat = new Matrix4();
+  projMat.setPerspective(50, canvas.width/canvas.height, 0.1, 1000);
+  gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+
+  // Pass the view matrix
+  var viewMat = new Matrix4();
+  //viewMat.setLookAt(g_eye[0], g_eye[1], g_eye[2], g_at[0], g_at[1], g_at[2], g_up[0], g_up[1], g_up[0]); // (eye, at, up)
+  viewMat.setLookAt(
+    g_eye.elements[0], g_eye.elements[1], g_eye.elements[2], 
+    g_at.elements[0], g_at.elements[1], g_at.elements[2], 
+    g_up.elements[0], g_up.elements[1], g_up.elements[0]); // (eye, at, up)
+  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
+  // Pass the matrix to u_ModelMatrix attribute
+  var gloablRotMat = new Matrix4().rotate(g_globalAngleX, 0, 1, 0);
+  gloablRotMat.rotate(g_globalAngleY, 1, 0, 0);
+  gloablRotMat.rotate(g_globalAngleZ, 0, 0, 1);
+
+  gl.uniformMatrix4fv(u_GloablRotateMatrix, false, gloablRotMat.elements);
+
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  //var len = g_points.length;
+  /*var len = g_shapesList.length;
+
+  for(var i = 0; i < len; i++) {
+
+    g_shapesList[i].render();
+  
+  }*/
+
+  // Draw a test triangle
+  // drawTriangle3D( [-1.0, 0.0, 0.0,    -0.5, -1.0, 0.0,   0.0, 0.0, 0.0] );
+
+  // Draw the body cube
+
+  var floor = new Cube();
+  floor.color = [0.3, 0.5, 0.35, 1.0];
+  floor.textureNum = -2;
+  floor.matrix.translate(0, -.75, 0.0);
+  floor.matrix.scale(100, 0, 100);
+  floor.matrix.translate(-.5, 0, -.5);
+  floor.render();
+
+  var sky = new Cube();
+  sky.color = [0.5, 0.9, 1, 1.0];
+  sky.textureNum = 0;
+  sky.matrix.translate(0, -1, 0.0);
+  sky.matrix.scale(1000, 1000, 1000);
+  sky.matrix.translate(-.5, 0, -.5);
+  sky.render();
+
+  // drawMap();
+  drawWholeMap();
+
+  drawBlockyAnimal();
+  
+  /*var body = new Cube();
+  body.color = [1.0, 0.0, 0.0, 1.0];
+  body.textureNum = 1;
+  body.matrix.setTranslate(-0.25, -0.75, 0.0);
+  body.matrix.rotate(-5, 1, 0, 0);
+  body.matrix.scale(0.5, 0.3, 0.5);
+  body.render();
+
+  // Draw a left arm
+  var leftArm = new Cube();
+  leftArm.color = [1, 1, 0, 1];
+  leftArm.textureNum = -1;
+  leftArm.matrix.setTranslate(0, -0.5, 0.0);
+  leftArm.matrix.rotate(-5, 1, 0, 0);
+  leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
+  //if (g_yellowAnimation) {
+  //  leftArm.matrix.rotate(45*Math.sin(g_seconds), 0, 0, 1);
+  //} else {
+  //  leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
+  //}
+  var yellowCoordinatesMatrix = new Matrix4(leftArm.matrix);
+  leftArm.matrix.scale(0.25, 0.7, 0.5);
+  leftArm.matrix.translate(-0.5, 0, 0);
+  leftArm.render();
+
+  // Test box
+  var box = new Cube();
+  box.color = [1, 0, 1, 1];
+  box.textureNum = 0;
+  box.matrix = yellowCoordinatesMatrix;
+  box.matrix.translate(0, 0.65, 0);
+  box.matrix.rotate(g_magentaAngle, 0, 0, 1);
+  var purpleCoordinatesMatrix = new Matrix4(box.matrix);
+  box.matrix.scale(0.3, 0.3, 0.3);
+  box.matrix.translate(-0.5, 0, -0.001);
+  box.render();*/
+
+  // Draw the tube
+  /*var tube = new Cylinder();
+  tube.color = [0.0, 1.0, 0.0, 1.0];
+  tube.matrix = purpleCoordinatesMatrix;
+  tube.matrix.scale(0.3, 0.3, 0.3);
+  tube.matrix.rotate(90, 1, 0, 0);
+  tube.matrix.translate(-0.5, 0.0, -2.0);
+  tube.render();*/
 
   var duration = performance.now() - startTime;
   sendTextToHTML("ms: " + Math.floor(duration) + " fps: " + Math.floor(1000/duration)/10, "performance");
