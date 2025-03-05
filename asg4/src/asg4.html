@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Change a point color</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">
+    Please use a browser that supports "canvas"
+    </canvas>
+
+    <p id="performance"></p>
+
+    <button type="button" id="normalOn">Normal On</button>
+    <button type="button" id="normalOff">Normal Off</button>
+
+    <p>
+    <button type="button" id="lightOn">Light On</button>
+    <button type="button" id="lightOff">Light Off</button>
+
+    <p>
+    <button type="button" id="lightMove">Light Move</button>
+
+    <p>
+      Light X <input type="range" min="-250" max="250" value="0" class="slider" id="lightSlideX">
+      Light Y <input type="range" min="-250" max="250" value="100" class="slider" id="lightSlideY">
+      Light Z <input type="range" min="-250" max="250" value="200" class="slider" id="lightSlideZ">
+
+    <p>
+      Description: <br>
+      The Robotic Dog is leaving for a vacation. <br>
+      Build Him a House While He Leaves. <br>
+      Left Click to place a Block. <br>
+      Right Click to remove a Block <br>
+    </p>
+
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix-cse160.js"></script>
+    <script src="Circle.js"></script>
+    <script src="Triangle.js"></script>
+    <script src="Point.js"></script>
+    <script src="Cube.js"></script>
+    <script src="Sphere.js"></script>
+    <script src="Cylinder.js"></script>
+    <script src="asg4.js"></script>
+  </body>
+</html>
