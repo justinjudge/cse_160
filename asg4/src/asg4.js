@@ -13,6 +13,7 @@ var VSHADER_SOURCE = `
   uniform mat4 u_GloablRotateMatrix;
   uniform mat4 u_ViewMatrix; // new
   uniform mat4 u_ProjectionMatrix; // new
+  uniform vec3 u_AmbientLightColor; // new asg4
   void main() {
     gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GloablRotateMatrix * u_ModelMatrix * a_Position;
     v_UV = a_UV; // new
@@ -34,6 +35,7 @@ var FSHADER_SOURCE = `
   uniform vec3 u_cameraPos; // new asg4
   uniform bool u_lightOn; // new asg4
   varying vec4 v_VertPos; // new asg4
+  uniform vec3 u_AmbientLightColor; // new asg4
   void main() {
     if (u_whichTexture == -3) {
       gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0); // use normal direction
@@ -77,7 +79,7 @@ var FSHADER_SOURCE = `
     float specular = pow(max(dot(E,R), 0.0), 100.0);
 
     vec3 diffuse = vec3(gl_FragColor) * nDotL;
-    vec3 ambient = vec3(gl_FragColor) * 0.3;
+    vec3 ambient = vec3(gl_FragColor) * 0.3 * u_AmbientLightColor;
 
     if (u_lightOn) {
       if (u_whichTexture >= 0) {
@@ -107,6 +109,7 @@ let u_Sampler1;
 let u_lightPos; // new asg4
 let u_cameraPos; // new asg4
 let u_lightOn; // new asg4
+let u_AmbientLightColor; // new asg4
 
 function setupWebGL() {
   // Retrieve <canvas> element
@@ -161,6 +164,13 @@ function connectVariablesToGLSL() {
   u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
   if (!u_FragColor) {
     console.log('Failed to get the storage location of u_FragColor');
+    return;
+  }
+
+  // Get the storage location of u_FragColor
+  u_AmbientLightColor = gl.getUniformLocation(gl.program, 'u_AmbientLightColor');
+  if (!u_AmbientLightColor) {
+    console.log('Failed to get the storage location of u_AmbientLightColor');
     return;
   }
 
@@ -299,6 +309,7 @@ let g_normalOn = false;
 let g_lightPos = [0, 1, -2];
 let g_lightOn = true;
 let g_lightMove = true;
+let g_AmbientLightColor = [1.0, 1.0, 1.0];
 
 // Set up actions for the HTML UI elements
 function addActionsForHtmlUI() {
@@ -314,6 +325,11 @@ function addActionsForHtmlUI() {
   document.getElementById('lightSlideX').addEventListener('mousemove', function(ev) { if (ev.buttons == 1) {g_lightMove = false; g_lightPos[0] = this.value/100; renderAllShapes();}});
   document.getElementById('lightSlideY').addEventListener('mousemove', function(ev) { if (ev.buttons == 1) {g_lightPos[1] = this.value/100; renderAllShapes();}});
   document.getElementById('lightSlideZ').addEventListener('mousemove', function(ev) { if (ev.buttons == 1) {g_lightPos[2] = this.value/100; renderAllShapes();}});
+
+  // Ambient Light Controls
+  document.getElementById("redSlide").addEventListener('mouseup', function() { g_AmbientLightColor[0] = this.value/100; });
+  document.getElementById("greenSlide").addEventListener('mouseup', function() { g_AmbientLightColor[1] = this.value/100; });
+  document.getElementById("blueSlide").addEventListener('mouseup', function() { g_AmbientLightColor[2] = this.value/100; });
 
   // Stop menu from opening up
   document.addEventListener("contextmenu", function(event) { event.preventDefault(); });
@@ -949,6 +965,9 @@ function renderAllShapes() {
 
   // Pass the light status for GLSL
   gl.uniform1i(u_lightOn, g_lightOn);
+
+  // Pass the Ambient Light Color
+  gl.uniform3f(u_AmbientLightColor, g_AmbientLightColor[0], g_AmbientLightColor[1], g_AmbientLightColor[2]);
 
   // Draw the light
   var light = new Cube();
