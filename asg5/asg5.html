@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+		<title>My first three.js app</title>
+		<style>
+			html, body {
+				height: 95%;
+				margin: 0;
+			}
+			#c {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+			</style>
+	</head>
+
+	<body>
+		<canvas id="c"></canvas>
+
+		<h1>
+			Click On the Car to Turn the Headlights On/Off <br>
+			Use W/A keys to Drive car Forward and Back
+		</h1>
+	</body>
+
+	<script type="importmap">
+		{
+		  "imports": {
+			"three": "https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js",
+			"three/addons/": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/"
+		  }
+		}
+	</script>
+	<script type="module" src="src/asg5.js"></script>
+</html>
